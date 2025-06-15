@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productivity Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 350px;
+            min-height: 400px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .header {
+            padding: 20px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .stats-container {
+            padding: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .stat-title {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .productive { background: #4CAF50; }
+        .unproductive { background: #f44336; }
+        .neutral { background: #FF9800; }
+
+        .top-sites {
+            margin-top: 15px;
+        }
+
+        .site-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 12px;
+        }
+
+        .site-item:last-child {
+            border-bottom: none;
+        }
+
+        .site-domain {
+            font-weight: 500;
+        }
+
+        .site-time {
+            opacity: 0.8;
+        }
+
+        .actions {
+            padding: 0 20px 20px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 8px;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+            opacity: 0.7;
+        }
+
+        .category-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎯 Productivity Tracker</h1>
+        <p>Track your digital habits</p>
+    </div>
+
+    <div id="loading" class="loading">
+        <p>Loading your stats...</p>
+    </div>
+
+    <div id="content" class="stats-container" style="display: none;">
+        <div class="stat-card">
+            <div class="stat-header">
+                <span class="stat-title">Today's Activity</span>
+                <span class="stat-value" id="totalTime">0h 0m</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill productive" id="productiveBar" style="width: 0%"></div>
+            </div>
+            <div style="margin-top: 8px; font-size: 12px;">
+                <span class="category-indicator productive"></span>Productive: <span id="productiveTime">0m</span>
+                <span class="category-indicator unproductive" style="margin-left: 15px;"></span>Unproductive: <span id="unproductiveTime">0m</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-title" style="margin-bottom: 10px;">Top Sites Today</div>
+            <div id="topSites">
+                <div class="site-item">
+                    <span class="site-domain">No data yet</span>
+                    <span class="site-time">Start browsing!</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="actions">
+        <button class="btn" onclick="openDashboard()">📊 View Dashboard</button>
+        <button class="btn" onclick="exportData()">📤 Export Data</button>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>

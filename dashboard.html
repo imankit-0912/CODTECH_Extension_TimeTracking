@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productivity Analytics Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .card h3 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 1.3rem;
+        }
+
+        .time-filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .metric-card {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #667eea;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .chart-container {
+            height: 300px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .progress-ring {
+            width: 200px;
+            height: 200px;
+            position: relative;
+            margin: 0 auto;
+        }
+
+        .progress-ring svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring circle {
+            fill: none;
+            stroke-width: 12;
+        }
+
+        .progress-ring .bg {
+            stroke: #e0e0e0;
+        }
+
+        .progress-ring .productive {
+            stroke: #4CAF50;
+            stroke-linecap: round;
+            transition: stroke-dasharray 0.5s ease;
+        }
+
+        .progress-ring .unproductive {
+            stroke: #f44336;
+            stroke-linecap: round;
+            transition: stroke-dasharray 0.5s ease;
+        }
+
+        .progress-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .progress-center .main-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .progress-center .sub-value {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .site-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .site-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .site-item:last-child {
+            border-bottom: none;
+        }
+
+        .site-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .category-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .productive { background: #4CAF50; }
+        .unproductive { background: #f44336; }
+        .neutral { background: #FF9800; }
+
+        .site-domain {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .site-time {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .weekly-chart {
+            height: 250px;
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 20px 0;
+        }
+
+        .day-bar {
+            flex: 1;
+            background: #f0f0f0;
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            min-height: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .day-bar:hover {
+            opacity: 0.8;
+        }
+
+        .day-bar .productive-bar {
+            background: #4CAF50;
+            border-radius: 4px 4px 0 0;
+            width: 100%;
+        }
+
+        .day-bar .unproductive-bar {
+            background: #f44336;
+            width: 100%;
+        }
+
+        .day-label {
+            text-align: center;
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .report-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 30px;
+            margin-top: 30px;
+        }
+
+        .report-section h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .insight {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+
+        .insight h4 {
+            margin-bottom: 8px;
+        }
+
+        .export-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 25px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Productivity Analytics</h1>
+            <p>Insights into your digital habits and productivity patterns</p>
+        </div>
+
+        <div class="time-filters">
+            <button class="filter-btn active" onclick="setTimeFilter('today')">Today</button>
+            <button class="filter-btn" onclick="setTimeFilter('week')">This Week</button>
+            <button class="filter-btn" onclick="setTimeFilter('month')">This Month</button>
+        </div>
+
+        <div id="loading" class="loading">
+            <h3>Loading your analytics...</h3>
+            <p>Please wait while we analyze your productivity data</p>
+        </div>
+
+        <div id="dashboard" style="display: none;">
+            <div class="dashboard-grid">
+                <!-- Overview Metrics -->
+                <div class="card metric-card">
+                    <div class="metric-value" id="totalHours">0h</div>
+                    <div class="metric-label">Total Time</div>
+                </div>
+
+                <div class="card metric-card">
+                    <div class="metric-value" id="productivityScore">0%</div>
+                    <div class="metric-label">Productivity Score</div>
+                </div>
+
+                <div class="card metric-card">
+                    <div class="metric-value" id="topCategory">-</div>
+                    <div class="metric-label">Top Category</div>
+                </div>
+
+                <!-- Productivity Breakdown -->
+                <div class="card">
+                    <h3>🎯 Productivity Breakdown</h3>
+                    <div class="chart-container">
+                        <div class="progress-ring">
+                            <svg viewBox="0 0 120 120">
+                                <circle class="bg" cx="60" cy="60" r="50"></circle>
+                                <circle class="productive" cx="60" cy="60" r="50" id="productiveCircle"></circle>
+                                <circle class="unproductive" cx="60" cy="60" r="50" id="unproductiveCircle"></circle>
+                            </svg>
+                            <div class="progress-center">
+                                <div class="main-value" id="productivePercent">0%</div>
+                                <div class="sub-value">Productive</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Websites -->
+                <div class="card">
+                    <h3>🌐 Top Websites</h3>
+                    <div class="site-list" id="topWebsites">
+                        <div class="no-data">No data available</div>
+                    </div>
+                </div>
+
+                <!-- Weekly Trend -->
+                <div class="card">
+                    <h3>📈 Weekly Trend</h3>
+                    <div class="weekly-chart" id="weeklyChart">
+                        <div class="no-data">Loading weekly data...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weekly Report -->
+            <div class="report-section" id="weeklyReport">
+                <h2>📋 Weekly Productivity Report</h2>
+                <div id="insights">
+                    <!-- Insights will be generated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="export-btn" onclick="exportReport()">📤 Export Report</button>
+
+    <script>
+        let currentFilter = 'today';
+        let allEntries = [];
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', async function() {
+            await loadData();
+        });
+
+        async function loadData() {
+            try {
+                const result = await chrome.storage.local.get(['timeEntries']);
+                allEntries = result.timeEntries || [];
+                updateDashboard();
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('loading').innerHTML = '<h3>Error loading data</h3><p>Please try refreshing the page</p>';
+            }
+        }
+
+        function setTimeFilter(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            updateDashboard();
+        }
+
+        function updateDashboard() {
+            const filteredEntries = filterEntriesByTime(allEntries, currentFilter);
+            
+            if (filteredEntries.length === 0) {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                showNoData();
+                return;
+            }
+
+            const stats = calculateDetailedStats(filteredEntries);
+            
+            updateMetrics(stats);
+            updateProductivityChart(stats);
+            updateTopWebsites(stats);
+            updateWeeklyChart();
+            generateInsights(stats);
+
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+        }
+
+        function filterEntriesByTime(entries, timeFilter) {
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            
+            switch(timeFilter) {
+                case 'today':
+                    return entries.filter(entry => {
+                        const entryDate = new Date(entry.timestamp);
+                        return entryDate >= today;
+                    });
+                
+                case 'week':
+                    const weekStart = new Date(today);
+                    weekStart.setDate(today.getDate() - today.getDay());
+                    return entries.filter(entry => {
+                        const entryDate = new Date(entry.timestamp);
+                        return entryDate >= weekStart;
+                    });
+                
+                case 'month':
+                    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+                    return entries.filter(entry => {
+                        const entryDate = new Date(entry.timestamp);
+                        return entryDate >= monthStart;
+                    });
+                
+                default:
+                    return entries;
+            }
+        }
+
+        function calculateDetailedStats(entries) {
+            const stats = {
+                totalTime: 0,
+                productiveTime: 0,
+                unproductiveTime: 0,
+                neutralTime: 0,
+                sites: {},
+                dailyStats: {},
+                categories: { productive: 0, unproductive: 0, neutral: 0 }
+            };
+
+            entries.forEach(entry => {
+                stats.totalTime += entry.timeSpent;
+                
+                // Category stats
+                stats.categories[entry.category] += entry.timeSpent;
+                
+                // Site stats
+                if (!stats.sites[entry.domain]) {
+                    stats.sites[entry.domain] = {
+                        domain: entry.domain,
+                        time: 0,
+                        category: entry.category,
+                        visits: 0
+                    };
+                }
+                stats.sites[entry.domain].time += entry.timeSpent;
+                stats.sites[entry.domain].visits++;
+
+                // Daily stats
+                const date = entry.date;
+                if (!stats.dailyStats[date]) {
+                    stats.dailyStats[date] = {
+                        productive: 0,
+                        unproductive: 0,
+                        neutral: 0,
+                        total: 0
+                    };
+                }
+                stats.dailyStats[date][entry.category] += entry.timeSpent;
+                stats.dailyStats[date].total += entry.timeSpent;
+            });
+
+            stats.productiveTime = stats.categories.productive;
+            stats.unproductiveTime = stats.categories.unproductive;
+            stats.neutralTime = stats.categories.neutral;
+
+            stats.topSites = Object.values(stats.sites)
+                .sort((a, b) => b.time - a.time)
+                .slice(0, 10);
+
+            return stats;
+        }
+
+        function updateMetrics(stats) {
+            document.getElementById('totalHours').textContent = formatTime(stats.totalTime);
+            
+            const productivityScore = stats.totalTime > 0 ? 
+                Math.round((stats.productiveTime / stats.totalTime) * 100) : 0;
+            document.getElementById('productivityScore').textContent = productivityScore + '%';
+
+            const topCategory = stats.productiveTime > stats.unproductiveTime ? 
+                (stats.productiveTime > stats.neutralTime ? 'Productive' : 'Neutral') :
+                (stats.unproductiveTime > stats.neutralTime ? 'Unproductive' : 'Neutral');
+            document.getElementById('topCategory').textContent = topCategory;
+        }
+
+        function updateProductivityChart(stats) {
+            const total = stats.totalTime;
+            if (total === 0) return;
+
+            const productivePercent = (stats.productiveTime / total) * 100;
+            const unproductivePercent = (stats.unproductiveTime / total) * 100;
+
+            const circumference = 2 * Math.PI * 50;
+            const productiveLength = (productivePercent / 100) * circumference;
+            const unproductiveLength = (unproductivePercent / 100) * circumference;
+
+            const productiveCircle = document.getElementById('productiveCircle');
+            const unproductiveCircle = document.getElementById('unproductiveCircle');
+
+            productiveCircle.style.strokeDasharray = `${productiveLength} ${circumference}`;
+            unproductiveCircle.style.strokeDasharray = `${unproductiveLength} ${circumference}`;
+            unproductiveCircle.style.strokeDashoffset = -productiveLength;
+
+            document.getElementById('productivePercent').textContent = Math.round(productivePercent) + '%';
+        }
+
+        function updateTopWebsites(stats) {
+            const container = document.getElementById('topWebsites');
+            
+            if (stats.topSites.length === 0) {
+                container.innerHTML = '<div class="no-data">No websites visited yet</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+            stats.topSites.forEach(site => {
+                const siteItem = document.createElement('div');
+                siteItem.className = 'site-item';
+                siteItem.innerHTML = `
+                    <div class="site-info">
+                        <div class="category-dot ${site.category}"></div>
+                        <span class="site-domain">${site.domain}</span>
+                    </div>
+                    <span class="site-time">${formatTime(site.time)}</span>
+                `;
+                container.appendChild(siteItem);
+            });
+        }
+
+        function updateWeeklyChart() {
+            const container = document.getElementById('weeklyChart');
+            const weekData = getWeeklyData();
+            
+            if (weekData.length === 0) {
+                container.innerHTML = '<div class="no-data">No weekly data available</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+            const maxTime = Math.max(...weekData.map(day => day.total));
+
+            weekData.forEach(day => {
+                const dayContainer = document.createElement('div');
+                dayContainer.style.flex = '1';
+                
+                const productiveHeight = maxTime > 0 ? (day.productive / maxTime) * 200 : 0;
+                const unproductiveHeight = maxTime > 0 ? (day.unproductive / maxTime) * 200 : 0;
+                
+                dayContainer.innerHTML = `
+                    <div class="day-bar" style="height: ${Math.max(productiveHeight + unproductiveHeight, 20)}px;" 
+                         title="${day.label}: ${formatTime(day.total)}">
+                        <div class="productive-bar" style="height: ${productiveHeight}px;"></div>
+                        <div class="unproductive-bar" style="height: ${unproductiveHeight}px;"></div>
+                    </div>
+                    <div class="day-label">${day.label}</div>
+                `;
+                
+                container.appendChild(dayContainer);
+            });
+        }
+
+        function getWeeklyData() {
+            const weekData = [];
+            const today = new Date();
+            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(today.getDate() - i);
+                const dateStr = date.toISOString().split('T')[0];
+                
+                const dayEntries = allEntries.filter(entry => entry.date === dateStr);
+                const dayStats = {
+                    label: dayNames[date.getDay()],
+                    date: dateStr,
+                    productive: 0,
+                    unproductive: 0,
+                    neutral: 0,
+                    total: 0
+                };
+                
+                dayEntries.forEach(entry => {
+                    dayStats[entry.category] += entry.timeSpent;
+                    dayStats.total += entry.timeSpent;
+                });
+                
+                weekData.push(dayStats);
+            }
+            
+            return weekData;
+        }
+
+        function generateInsights(stats) {
+            const container = document.getElementById('insights');
+            const insights = [];
+            
+            // Productivity score insight
+            const productivityScore = stats.totalTime > 0 ? 
+                (stats.productiveTime / stats.totalTime) * 100 : 0;
+            
+            if (productivityScore > 70) {
+                insights.push({
+                    title: '🎉 Excellent Productivity!',
+                    content: `You spent ${Math.round(productivityScore)}% of your time on productive activities. Keep up the great work!`
+                });
+            } else if (productivityScore > 40) {
+                insights.push({
+                    title: '👍 Good Progress',
+                    content: `Your productivity score is ${Math.round(productivityScore)}%. Consider reducing time on distracting websites to improve further.`
+                });
+            } else {
+                insights.push({
+                    title: '⚠️ Room for Improvement',
+                    content: `Your productivity score is ${Math.round(productivityScore)}%. Try using website blockers during work hours to stay focused.`
+                });
+            }
+            
+            // Top distracting site
+            const topUnproductive = stats.topSites.find(site => site.category === 'unproductive');
+            if (topUnproductive) {
+                insights.push({
+                    title: '🎯 Focus Opportunity',
+                    content: `You spent ${formatTime(topUnproductive.time)} on ${topUnproductive.domain}. Consider setting time limits for this site.`
+                });
+            }
+            
+            // Most productive site
+            const topProductive = stats.topSites.find(site => site.category === 'productive');
+            if (topProductive) {
+                insights.push({
+                    title: '💪 Productivity Champion',
+                    content: `Great job spending ${formatTime(topProductive.time)} on ${topProductive.domain}. This shows your commitment to learning and growth.`
+                });
+            }
+            
+            container.innerHTML = '';
+            insights.forEach(insight => {
+                const insightDiv = document.createElement('div');
+                insightDiv.className = 'insight';
+                insightDiv.innerHTML = `
+                    <h4>${insight.title}</h4>
+                    <p>${insight.content}</p>
+                `;
+                container.appendChild(insightDiv);
+            });
+        }
+
+        function showNoData() {
+            document.getElementById('topWebsites').innerHTML = '<div class="no-data">Start browsing to see your analytics!</div>';
+            document.getElementById('weeklyChart').innerHTML = '<div class="no-data">No data to display</div>';
+            document.getElementById('insights').innerHTML = '<div class="no-data">Insights will appear as you use the internet</div>';
+        }
+
+        function formatTime(milliseconds) {
+            const seconds = Math.floor(milliseconds / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            
+            const remainingMinutes = minutes % 60;
+            
+            if (hours > 0) {
+                return `${hours}h ${remainingMinutes}m`;
+            } else if (minutes > 0) {
+                return `${minutes}m`;
+            } else {
+                return `${seconds}s`;
+            }
+        }
+
+        async function exportReport() {
+            try {
+                const stats = calculateDetailedStats(filterEntriesByTime(allEntries, 'week'));
+                const report = {
+                    generatedAt: new Date().toISOString(),
+                    period: 'Last 7 days',
+                    summary: {
+                        totalTime: formatTime(stats.totalTime),
+                        productivityScore: Math.round((stats.productiveTime / stats.totalTime) * 100),
+                        topSites: stats.topSites.slice(0, 5)
+                    },
+                    rawData: allEntries
+                };
+                
+                const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `productivity-report-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+            } catch (error) {
+                console.error('Error exporting report:', error);
+                alert('Error exporting report. Please try again.');
+            }
+        }
+    </script>

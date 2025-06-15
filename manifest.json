@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "Time Tracking and Productivity Analytics",
+  "version": "1.0.0",
+  "description": "Track time spent on websites and analyze productivity",
+
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "storage"
+  ],
+
+  "host_permissions": [
+    "<all_urls>"
+  ],
+
+  "background": {
+    "service_worker": "background.js"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"] 
+    }
+  ],
+
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Productivity Tracker"
+  },
+
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}
