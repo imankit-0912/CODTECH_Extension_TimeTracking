@@ -1,6 +1,14 @@
 # CODTECH_Extension_TimeTracking
-Chrome Extension for time tracking and Productive analytics
-------------------------------------------------------------
+___________________________________________________________
+*Company*: CODTECH IT SOLUTIONS
+*NAME*: ANKIT KUMAR KARN
+*INTERN ID*: CT04DN529
+*DOMAIN*: FULL STACK WEB DEVELOPMENT
+*DURATION*: 4 WEEKS
+*MENTOR*: NEELA SANTOSH
+-------------------------------------------------------------
+> Chrome Extension for time tracking and Productive analytics
+-------------------------------------------------------------
  > Develop a chrome Extension that tracks the time spent on 
  different Website and provides Productive Analytics.
 
