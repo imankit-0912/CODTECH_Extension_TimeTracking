@@ -124,8 +124,8 @@ Pull requests are welcome! If you’d like to contribute or suggest improvements
 ## 📧 Contact
 
 **Developer:** Ankit Kumar Karn
-**Email:** [ankitkumarkarn@example.com](mailto:imankitkumar.krn.com)
-**GitHub:** [github.com/yourusername](https://github.com/imankit-0912)
+**Email:** [imankitkumar.krn@gmail.com](mailto:imankitkumar.krn@gmail.com)
+**GitHub:** [github.com/imankit-0912](https://github.com/imankit-0912)
 
 ---
 
