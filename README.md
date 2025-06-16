@@ -129,7 +129,5 @@ Pull requests are welcome! If you’d like to contribute or suggest improvements
 
 ---
 
-Let me know if you'd like to include screenshots or a sample of the analytics chart inside the README!
-
 # Output
 > ![Image](https://github.com/user-attachments/assets/0cb910d2-d6f3-4570-8a8f-4308dfbac4df)
